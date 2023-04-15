@@ -1,0 +1,83 @@
+version: "3.9"
+services:
+
+  mysql:
+    container_name: mysql
+    image: mariadb:10.5.8-focal
+    hostname: mysql
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/db-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    environment:
+      - MYSQL_ROOT_PASSWORD=1
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_USER=adminer
+      - MYSQL_PASSWORD=adminer
+      - MYSQL_DATABASE=adminer
+    ports:
+      - 3306:3306
+    dns:
+      - 1.1.1.1  
+    networks:
+      my-net:
+        ipv4_address: "192.168.44.8"
+        
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      ADMINER_DEFAULT_DB_DRIVER: mysql
+      ADMINER_DEFAULT_DB_HOST: mysql
+      ADMINER_DEFAULT_DB_NAME: adminer
+      ADMINER_DESIGN: nette
+      ADMINER_PLUGINS: tables-filter tinymce
+    ports:
+      - 8080:8080
+    dns:
+      - 1.1.1.1
+    networks:
+      my-net:
+        ipv4_address: "192.168.44.9"
+        
+  scope:
+    container_name: monitor
+    image: weaveworks/scope:latest
+    pid: "host"
+    privileged: true
+    restart: always
+    labels:
+      - "works.weave.role=system"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
+    command:
+      - "--probe.docker=true"
+    ports:
+      - 4040:4040
+    dns:
+      - 1.1.1.1
+    extra_hosts:
+    - "monitor.fatlan.com:192.168.44.10"
+    depends_on:
+      - mysql
+    networks:
+      my-net:
+        ipv4_address: "192.168.44.10"
+
+volumes:
+  mysql_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/mysql/
+      
+networks:
+  my-net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.44.0/24

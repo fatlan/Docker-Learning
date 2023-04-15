@@ -1,0 +1,15 @@
+---
+version: "3.9"
+services:
+  web_server_01:
+    image: nginx:latest
+    ports:
+      - 8001:80
+  web_server_02:
+    image: nginx:latest
+    ports:
+      - 8002:80
+  web_server_03:
+    image: nginx:latest
+    ports:
+      - 8003:80
