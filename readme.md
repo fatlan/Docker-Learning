@@ -1,3 +1,3 @@
 ### Verdiğim Eğitimler
 
-✨ [Eğitim içerikleri](https://www.fatlan.com/egitim/) ✨
+# ✨ [Eğitim içerikleri](https://www.fatlan.com/egitim/) ✨
